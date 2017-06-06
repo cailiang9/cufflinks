@@ -26,12 +26,12 @@ _FILE_CONTENT = {
 				 		"sharing" : "public",
 				 		"theme" : "pearl",
 				 		"colorscale" : "dflt",
-				 		"offline" : False,
+				 		"offline" : True,
 				 		"offline_url":'',
 				 		"offline_show_link" : True,
 				 		"offline_link_text" : 'Export to plot.ly',
 				 		"datagen_mode" : 'stocks',
-				 		"dimensions" : None
+				 		"dimensions" : (None, 300)
 						}
 				 }
 
@@ -139,7 +139,7 @@ def set_config_file(sharing=None,theme=None,colorscale=None,offline=None,
 	if offline is not None:
 		config['offline']=offline
 		if offline:
-			go_offline()
+			go_offline(True)
 	if datagen_mode:
 		config['datagen_mode']=datagen_mode
 	if offline_url:
