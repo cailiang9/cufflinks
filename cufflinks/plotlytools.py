@@ -194,7 +194,7 @@ def _iplot(self,data=None,layout=None,filename='',sharing=None,
 			dash='solid',mode='lines',symbol='dot',size=12,barmode='',sortbars=False,bargap=None,bargroupgap=None,bins=None,histnorm='',
 			histfunc='count',orientation='v',boxpoints=False,annotations=None,keys=False,bestfit=False,
 			bestfit_colors=None,mean=False,mean_colors=None,categories='',x='',y='',z='',text='',gridcolor=None,
-			zerolinecolor=None,margin=None,labels=None,values=None,secondary_y='',secondary_y_title='',subplots=False,shape=None,error_x=None,
+			zerolinecolor=None,margin=[50,50,50,50],labels=None,values=None,secondary_y='',secondary_y_title='',subplots=False,shape=None,error_x=None,
 			error_y=None,error_type='data',locations=None,lon=None,lat=None,asFrame=False,asDates=False,asFigure=False,
 			asImage=False,dimensions=None,asPlot=False,asUrl=False,online=None,**kwargs):
 	"""
