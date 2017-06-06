@@ -9,5 +9,5 @@ setup(name='cufflinks',
       keywords = ['pandas', 'plotly', 'plotting'],
       url = 'https://github.com/santosjorge/cufflinks',
       packages=['cufflinks'],
-      install_requires = ['pandas','plotly>=2.0.0','colorlover>=0.2'],
+      install_requires = ['pandas','plotly>=2.0.0','colorlover>=0.2','statsmodels>=0.5.0'],
 	  zip_safe=False)
