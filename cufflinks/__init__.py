@@ -28,7 +28,7 @@ from .version import __version__
 
 try:
 	if get_config_file()['offline']:
-		go_offline()
+		go_offline(True)
 	else:
 		go_online()
 except:
