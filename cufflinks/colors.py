@@ -2,16 +2,18 @@
 # Special thanks to @krey for the python3 support
 ##
 
-
-from collections import deque
-from .auth import get_config_file
 import numpy as np
 import colorsys
 import colorlover as cl
-from .utils import inverseDict
 import operator
-from . import themes
+import copy
+
+from collections import deque
 from IPython.display import HTML,display
+
+from . import themes
+from .utils import inverseDict
+from .auth import get_config_file
 
 class CufflinksError(Exception):
 		pass
@@ -392,6 +394,7 @@ cnames={'aliceblue': '#F0F8FF',
  'indianred':		 '#CD5C5C',
  'indigo':			 '#4B0082',
  'ivory':			 '#FFFFF0',
+ 'java':			 '#17BECF',
  'khaki':			 '#F0E68C',
  'lavender':		 '#E6E6FA',
  'lavenderblush':	 '#FFF0F5',
@@ -668,7 +671,7 @@ def get_scales(scale=None,n=None):
 		if scale[0]=='-':
 			scale=scale[1:]
 			is_reverse=True
-		d=_scales_names[scale.lower()]
+		d=copy.deepcopy(_scales_names[scale.lower()])
 		keys=list(map(int,list(d.keys())))
 		if n:
 			if n in keys:

@@ -612,14 +612,16 @@ def _iplot(self,data=None,layout=None,filename='',sharing=None,
 	# 		'error_y','error_type','locations','lon','lat','asFrame','asDates','asFigure',
 	# 		'asImage','dimensions','asPlot','asUrl','online']
 	valid_kwargs = ['color','opacity','column','columns','labels','text','world_readable','colorbar']
+	TRACE_KWARGS = ['hoverinfo']
 	PIE_KWARGS=['sort','pull','hole','textposition','textinfo','linecolor']
-	OHLC_KWARGS=['up_color','down_color','open','high','low','close','volume','name']
+	OHLC_KWARGS=['up_color','down_color','open','high','low','close','volume','name','decreasing','increasing']
 	SUBPLOT_KWARGS=['horizontal_spacing', 'vertical_spacing',
 					'specs', 'insets','start_cell','shared_xaxes','shared_yaxes','subplot_titles']
 	GEO_KWARGS=['locationmode','locationsrc','geo','lon','lat']
 	ERROR_KWARGS=['error_trace','error_values_minus','error_color','error_thickness',
 					'error_width','error_opacity']
-	kwargs_list = [tools.__LAYOUT_KWARGS,OHLC_KWARGS,PIE_KWARGS,SUBPLOT_KWARGS,GEO_KWARGS,ERROR_KWARGS]
+	kwargs_list = [tools.__LAYOUT_KWARGS,TRACE_KWARGS,
+				   OHLC_KWARGS,PIE_KWARGS,SUBPLOT_KWARGS,GEO_KWARGS,ERROR_KWARGS]
 	[valid_kwargs.extend(_) for _ in kwargs_list]
 
 	dict_modifiers_keys = ['line']
@@ -747,7 +749,11 @@ def _iplot(self,data=None,layout=None,filename='',sharing=None,
 						text=self[text].values
 				data=df.to_iplot(colors=colors,colorscale=colorscale,kind=kind,fill=fill,width=width,dash=dash,sortbars=sortbars,keys=keys,
 						bestfit=bestfit,bestfit_colors=bestfit_colors,mean=mean,mean_colors=mean_colors,asDates=asDates,mode=mode,symbol=symbol,size=size,
-						text=text,**kwargs)				
+						text=text,**kwargs)		
+				trace_kw=check_kwargs(kwargs,TRACE_KWARGS)
+				for trace in data:
+					trace.update(**trace_kw)		
+						
 				if kind in ('spread','ratio'):
 						if kind=='spread':
 							trace=self.apply(lambda x:x[0]-x[1],axis=1)
@@ -905,10 +911,10 @@ def _iplot(self,data=None,layout=None,filename='',sharing=None,
 				kw=check_kwargs(kwargs,OHLC_KWARGS)
 				d=ta._ohlc_dict(self,validate='ohlc',**kw)
 				_d=dict(type=kind,
-							open=self[d['open']],
-							high=self[d['high']],
-							low=self[d['low']],
-							close=self[d['close']],
+							open=self[d['open']].values,
+							high=self[d['high']].values,
+							low=self[d['low']].values,
+							close=self[d['close']].values,
 							x=self.index
 												)
 				if 'name' in kw:
@@ -924,10 +930,10 @@ def _iplot(self,data=None,layout=None,filename='',sharing=None,
 				
 				_d['increasing']=dict(line=dict(color=kw['up_color']) if 'up_color' in kw else dict(),showlegend=showlegend)
 				_d['decreasing']=dict(line=dict(color=kw['down_color']) if 'down_color' in kw else dict(),showlegend=showlegend)
+				for k in ('increasing','decreasing'):
+					if k in kw:
+						_d[k]=deep_update(_d[k],kw[k])
 				
-				if title:
-					_d['name']=title
-				#Not sure if we should always stick it on y2
 				_d['yaxis']='y2'
 				data=[_d]
 
@@ -942,11 +948,12 @@ def _iplot(self,data=None,layout=None,filename='',sharing=None,
 							'colorscale':get_colorscale(colorscale),
 							'marker':get_marker(Marker(line=Line(width=width)))}
 				elif kind=='scattergeo':
-					if not all([x!=None for x in (lon,lat,z)]):
+					if not all([x!=None for x in (lon,lat)]):
 						raise Exception("Scattergeo maps require a 'lon' and 'lat' column names specified")
 					geo_data={'type':'scattergeo','lat':self[lat],'lon':self[lon],
 							'marker':get_marker(Marker(line=Line(width=width),
-												symbol=symbol,colorscale=get_colorscale(colorscale),color=self[z]))}
+												symbol=symbol,colorscale=get_colorscale(colorscale),
+												color=self[z] if z else None))}
 				if 'colorbar' in kwargs:
 					geo_data['colorbar']=kwargs['colorbar']
 				geo_data.update(kw)
@@ -1252,18 +1259,19 @@ def _ta_plot(self,study,periods=14,column=None,include=True,str=None,detail=Fals
 					diff
 					
 	"""
+
 	if 'columns' in iplot_kwargs:
-		column=iplot_kwargs['columns']
-		del iplot_kwargs['columns']
+		column=iplot_kwargs.pop('columns')
+		
 	if 'period' in iplot_kwargs:
-		periods=iplot_kwargs['period']
-		del iplot_kwargs['period']
+		periods=iplot_kwargs.pop('period')
+		
 	if 'world_readable' in iplot_kwargs:
-		sharing=iplot_kwargs['world_readable']
-		del iplot_kwargs['world_readable']
-	if 'asFigure' in iplot_kwargs:
-		asFigure=iplot_kwargs['asFigure']
-		del iplot_kwargs['asFigure']
+		sharing=iplot_kwargs.pop('world_readable')
+
+	if 'study_color' in iplot_kwargs:
+		iplot_kwargs['study_colors']=iplot_kwargs.pop('study_color')
+		
 	if sharing is None:
 			sharing = auth.get_config_file()['sharing']
 	if isinstance(sharing,bool):
@@ -1273,7 +1281,7 @@ def _ta_plot(self,study,periods=14,column=None,include=True,str=None,detail=Fals
 				sharing='private'
 	iplot_kwargs['sharing']=sharing
 	if theme is None:
-		theme = auth.get_config_file()['theme']
+		theme = iplot_kwargs.pop('study_theme',auth.get_config_file()['theme'])
 
 	if not filename:
 		if 'title' in iplot_kwargs:
@@ -1318,39 +1326,24 @@ def _ta_plot(self,study,periods=14,column=None,include=True,str=None,detail=Fals
 
 	study_kwargs={}  
 	iplot_study_kwargs={}
-	for k in list(iplot_kwargs.keys()):
-		if 'study' in k:
-			iplot_study_kwargs[k.replace('study_','')]=iplot_kwargs[k]
-			del iplot_kwargs[k]
-	for k in __TA_KWARGS:
-		if k in iplot_kwargs:
-			study_kwargs[k]=iplot_kwargs[k]
-			del iplot_kwargs[k]	
+
+	study_kwargs=check_kwargs(iplot_kwargs,__TA_KWARGS,{},clean_origin=True)
+	iplot_study_kwargs=kwargs_from_keyword(iplot_kwargs,{},'study')
+
+	study_kwargs.update({'periods':periods})
+
+	ta_func = eval('ta.{0}'.format(study))
+
+	inset=study in ('sma','boll','ema','atr')
+	figure=get_study(self,ta_func,iplot_kwargs,iplot_study_kwargs,include=include,
+				     column=column,str=str,inset=inset)
 
 	if study=='rsi':
-		study_kwargs.update({'periods':periods})
-		figure=get_study(self,ta.rsi,iplot_kwargs,iplot_study_kwargs,include=include,column=column,str=str,inset=False)
 		rsi_upper=study_kwargs['rsi_upper'] if 'rsi_upper' in study_kwargs else 70
 		rsi_lower=study_kwargs['rsi_lower'] if 'rsi_lower' in study_kwargs else 30
 		yref='y2' if include else 'y1'
 		shapes=[tools.get_shape(y=i,yref=yref,color=j,dash='dash') for (i,j) in [(rsi_lower,'green'),(rsi_upper,'red')]]
 		figure['layout']['shapes']=shapes
-
-	if study=='macd':
-		figure=get_study(self,ta.macd,iplot_kwargs,iplot_study_kwargs,include=include,column=column,str=str,inset=False)
-	
-	if study=='sma':
-		study_kwargs.update({'periods':periods})
-		figure=get_study(self,ta.sma,iplot_kwargs,iplot_study_kwargs,include=include,column=column,str=str,inset=True)
-
-	if study=='boll':
-		study_kwargs.update({'periods':periods})
-		figure=get_study(self,ta.boll,iplot_kwargs,iplot_study_kwargs,include=include,column=column,str=str,inset=True)
-
-	if study=='correl':
-		study_kwargs.update({'periods':periods})
-		figure=get_study(self,ta.correl,iplot_kwargs,iplot_study_kwargs,include=include,column=column,str=str,inset=False)	
-
 
 	## Exports
 

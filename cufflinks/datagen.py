@@ -227,20 +227,14 @@ def bars(n=3,n_categories=3,prefix='category',columns=None,mode='abc'):
 def ohlc(n=100):
 	"""
 	Returns a DataFrame with the required format for 
-	a scatter (lines) plot
+	a candlestick or ohlc plot
+	df[['open','high','low','close']]
 
 	Parameters:
 	-----------
-		n_traces : int
-			Number of traces 
 		n : int
-			Number of points for each trace
-		columns : [str]
-			List of column names
-		mode : string
-			Format for each item
-				'abc' for alphabet columns
-				'stocks' for random stock names
+			Number of ohlc points
+		
 	"""	
 	index=pd.date_range('1/1/15',periods=n*288,freq='5min',tz='utc')
 	data=np.random.randn(n*288)
@@ -248,10 +242,26 @@ def ohlc(n=100):
 	df=pd.DataFrame(data,index=index,
 		columns=['a'])
 	df=df.cumsum()  
-	# df=df.resample('1d',how='ohlc')
 	df=df.resample('1d').ohlc()
-	# df.index=df.index.date
+	df.index=df.index.date
+	df.index=pd.to_datetime(df.index)
 	return df['a']
+
+def ohlcv(n=100):
+	"""
+	Returns a DataFrame with the required format for 
+	a candlestick or ohlc plot
+	df[['open','high','low','close','volume']
+
+	Parameters:
+	-----------
+		n : int
+			Number of ohlc points
+		
+	"""	
+	df=ohlc()
+	df['volume']=[np.random.randint(1000,10000) for _ in range(len(df))]
+	return df
 
 def box(n_traces=5,n=100,mode=None):
 	"""
