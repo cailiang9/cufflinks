@@ -14,7 +14,7 @@ from . import ta
 
 
 __TA_KWARGS = ['min_period','center','freq','how','rsi_upper','rsi_lower','boll_std','fast_period',
-			   'slow_period','signal_period']
+			   'slow_period','signal_period','initial','af','open','high','low','close']
 
 
 def iplot_to_dict(data):
@@ -110,7 +110,7 @@ def _to_iplot(self,colors=None,colorscale=None,kind='scatter',mode='lines',symbo
 			df.index=df.index.date
 		x=df.index.format()
 	elif isinstance(df.index,pd.MultiIndex):
-		x=['({0})'.format(','.join(_)) for _ in df.index.values]
+		x=['({0})'.format(','.join([str(__) for __ in _])) for _ in df.index.values]
 	else:
 		x = df.index.values
 	lines={}
@@ -335,9 +335,16 @@ def _iplot(self,data=None,layout=None,filename='',sharing=None,
 			Set the gap between groups
 				[0,1)
 			* Only valid when kind is 'histogram' or 'bar'		
-		bins : int
-			Specifies the number of bins 
+		bins : int or tuple 
+			if int:
+				Specifies the number of bins 
+			if tuple:
+				(start, end, size)
+				start : starting value
+				end: end value
+				size: bin size
 			* Only valid when kind='histogram'
+
 		histnorm : string
 				'' (frequency)
 				percent
@@ -827,10 +834,20 @@ def _iplot(self,data=None,layout=None,filename='',sharing=None,
 							__['y']=__['x']
 							del __['x']
 						if bins:
-							if orientation=='h':
-								__.update(nbinsy=bins)	
+							if type(bins) in (tuple,list):
+								try:
+									_bins={'start':bins[0],'end':bins[1],'size':bins[2]}
+									if orientation=='h':
+										__.update(ybins=_bins,autobiny=False)	
+									else:
+										__.update(xbins=_bins,autobinx=False)	
+								except:
+									print("Invalid format for bins generation")
 							else:
-								__.update(nbinsx=bins)
+								if orientation=='h':
+									__.update(nbinsy=bins)	
+								else:
+									__.update(nbinsx=bins)
 					data.append(__)
 
 			elif kind in ('heatmap','surface'):
@@ -1201,7 +1218,7 @@ def _ta_figure(self,**kwargs):
 	return self.ta_plot(**kwargs)
 
 
-def _ta_plot(self,study,periods=14,column=None,include=True,str=None,detail=False,
+def _ta_plot(self,study,periods=14,column=None,include=True,str='{name}({period})',detail=False,
 			 theme=None,sharing=None,filename='',asFigure=False,**iplot_kwargs):
 	"""
 	Generates a Technical Study Chart
@@ -1322,7 +1339,7 @@ def _ta_plot(self,study,periods=14,column=None,include=True,str=None,detail=Fals
 		df_ta=func(df,column=column,include=False,str=str,**study_kwargs)	
 		kind=iplot_kwargs['kind'] if 'kind' in iplot_kwargs else ''
 		iplot_study_kwargs['kind']='scatter'
-		iplot_study_kwargs['colors']='blue' if 'colors' not in iplot_study_kwargs else iplot_study_kwargs['colors']
+		iplot_study_kwargs['colors']=iplot_study_kwargs.get('colors',['blue','green','red'] if study=='dmi' else 'blue')
 		fig_1=df_ta.figure(theme=theme,**iplot_study_kwargs)
 		if kind in ['candle','ohlc']:
 				for i in fig_1['data']:
@@ -1343,7 +1360,7 @@ def _ta_plot(self,study,periods=14,column=None,include=True,str=None,detail=Fals
 
 	ta_func = eval('ta.{0}'.format(study))
 
-	inset=study in ('sma','boll','ema','atr')
+	inset=study in ('sma','boll','ema','atr','ptps')
 	figure=get_study(self,ta_func,iplot_kwargs,iplot_study_kwargs,include=include,
 				     column=column,str=str,inset=inset)
 

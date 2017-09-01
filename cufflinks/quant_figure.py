@@ -320,9 +320,9 @@ class QuantFig(object):
 				date1=date0
 				date0=df.index[0]
 
-		if isinstance(date0,pd.tslib.Timestamp):
+		if isinstance(date0,pd.Timestamp):
 			date0=date_tools.dateToString(date0,to_strfmt)
-		if isinstance(date1,pd.tslib.Timestamp):
+		if isinstance(date1,pd.Timestamp):
 			date1=date_tools.dateToString(date1,to_strfmt)
 		d={'x0':date0,'x1':date1,'y0':y0,'y1':y1}
 		d.update(**kwargs)
@@ -835,20 +835,14 @@ class QuantFig(object):
 			  'display':utils.merge_dict({'legendgroup':False},kwargs)}
 		self._add_study(study)
 
-	def add_cci(self,periods=14,high='high',low='low',close='close',
-				cci_upper=100,cci_lower=-100,showbands=True,str=None,name='',**kwargs):
+	def add_cci(self,periods=14,cci_upper=100,cci_lower=-100,
+			    showbands=True,str=None,name='',**kwargs):
 		"""
 		Commodity Channel Indicator study to QuantFigure.studies
 
 		Parameters:
 			periods : int or list(int)
 				Number of periods
-			high : string
-				Column that defines the high value
-			low : string
-				Column that defines the low value
-			close : string
-				Column that defines the close value
 			cci_upper : int
 				Upper bands level
 				default : 100
@@ -876,26 +870,84 @@ class QuantFig(object):
 		"""
 		study={'kind':'cci',
 			   'name':name,
-			   'params':{'periods':periods,'high':high,'low':low,'close':close,
+			   'params':{'periods':periods,'high':self._d['high'],'low':self._d['low'],'close':self._d['close'],
 						 'str':str},
 			  'display':utils.merge_dict({'legendgroup':True,'cci_upper':cci_upper,
 						 'cci_lower':cci_lower,'showbands':showbands},kwargs)}
 		self._add_study(study)		
+	
+	def add_adx(self,periods=14,str=None,name='',**kwargs):
+		"""
+		Add Average Directional Index (ADX) study to QuantFigure.studies
 
-	def add_atr(self,periods=14,high='high',low='low',close='close',str=None,
-					name='',**kwargs):
+		Parameters:
+			periods : int or list(int)
+				Number of periods
+			name : string
+				Name given to the study
+			str : string
+				Label factory for studies
+				The following wildcards can be used:
+					{name} : Name of the column
+					{study} : Name of the study
+					{period} : Period used
+				Examples:
+					'study: {study} - period: {period}'
+		kwargs: 
+			legendgroup : bool
+				If true, all legend items are grouped into a 
+				single one
+			All formatting values available on iplot()
+		"""
+		study={'kind':'adx',
+			   'name':name,
+			   'params':{'periods':periods,'high':self._d['high'],'low':self._d['low'],'close':self._d['close'],
+						 'str':str},
+			  'display':utils.merge_dict({'legendgroup':False},kwargs)}
+		self._add_study(study)
+
+	def add_ptps(self,periods=14,af=0.2,initial='long',str=None,name='',**kwargs):
+		"""
+		Add Parabolic SAR (PTPS) study to QuantFigure.studies
+
+		Parameters:
+			periods : int or list(int)
+				Number of periods
+			af : float
+				acceleration factor
+			initial : 'long' or 'short'
+				Iniital position
+				default: long
+			name : string
+				Name given to the study
+			str : string
+				Label factory for studies
+				The following wildcards can be used:
+					{name} : Name of the column
+					{study} : Name of the study
+					{period} : Period used
+				Examples:
+					'study: {study} - period: {period}'
+		kwargs: 
+			legendgroup : bool
+				If true, all legend items are grouped into a 
+				single one
+			All formatting values available on iplot()
+		"""
+		study={'kind':'ptps',
+			   'name':name,
+			   'params':{'periods':periods,'high':self._d['high'],'low':self._d['low'],'af':af,'initial':initial,
+						 'str':str},
+			  'display':utils.merge_dict({'legendgroup':False},kwargs)}
+		self._add_study(study)
+
+	def add_atr(self,periods=14,str=None,name='',**kwargs):
 		"""
 		Add Average True Range (ATR) study to QuantFigure.studies
 
 		Parameters:
 			periods : int or list(int)
 				Number of periods
-			high : string
-				Column that defines the high value
-			low : string
-				Column that defines the low value
-			close : string
-				Column that defines the close value
 			name : string
 				Name given to the study
 			str : string
@@ -914,22 +966,42 @@ class QuantFig(object):
 		"""
 		study={'kind':'atr',
 			   'name':name,
-			   'params':{'periods':periods,'high':high,'low':low,'close':close,
+			   'params':{'periods':periods,'high':self._d['high'],'low':self._d['low'],'close':self._d['close'],
 						 'str':str},
 			  'display':utils.merge_dict({'legendgroup':False},kwargs)}
 		self._add_study(study)		
 			
-	def add_trender(self):
-		pass
+	def add_dmi(self,periods=14,str='{name}({period})',
+					name='',**kwargs):
+		"""
+		Add Directional Movement Index (DMI) study to QuantFigure.studies
 
-	def add_dmi(self):
-		pass
+		Parameters:
+			periods : int or list(int)
+				Number of periods
+			name : string
+				Name given to the study
+			str : string
+				Label factory for studies
+				The following wildcards can be used:
+					{name} : Name of the column
+					{study} : Name of the study
+					{period} : Period used
+				Examples:
+					'study: {study} - period: {period}'
+		kwargs: 
+			legendgroup : bool
+				If true, all legend items are grouped into a 
+				single one
+			All formatting values available on iplot()
+		"""
+		study={'kind':'dmi',
+			   'name':name,
+			   'params':{'periods':periods,'high':self._d['high'],'low':self._d['low'],'close':self._d['close'],
+						 'str':str},
+			  'display':utils.merge_dict({'legendgroup':False},kwargs)}
+		self._add_study(study)		
 
-	def add_ptps(self):
-		pass
-
-	def add_stochastic(self):
-		pass
 
 	def _get_study_figure(self,study_id,**kwargs):
 		study=copy.deepcopy(self.studies[study_id])
@@ -982,7 +1054,7 @@ class QuantFig(object):
 			fig.data[0].update(marker=dict(color=bar_colors,line=dict(color=bar_colors)),
 					  opacity=0.8)
 
-		if kind in ('sma','ema','atr'):
+		if kind in ('sma','ema','atr','adx','dmi','ptps'):
 			local_kwargs,params=get_params([],params,display)
 			fig=df.ta_figure(study=kind,**params)
 
@@ -1124,9 +1196,9 @@ class QuantFig(object):
 			kwargs.update(slice=_slice,resample=_resample)
 			for k,v in list(self.studies.items()):
 				study_fig=self._get_study_figure(k,**kwargs)
-				if v['kind'] in ('boll','sma','ema'):
+				if v['kind'] in ('boll','sma','ema','ptps'):
 					study_fig.move_axis(yaxis='y2')                
-				if v['kind'] in ('rsi','volume','macd','atr','cci'):
+				if v['kind'] in ('rsi','volume','macd','atr','adx','cci','dmi'):
 					max_panel+=1
 					panel_data['n']+=1
 					study_fig.move_axis(yaxis='y{0}'.format(max_panel))
