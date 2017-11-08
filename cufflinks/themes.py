@@ -33,7 +33,7 @@ THEMES = {
 
 		},
 		'pearl' : {
-			'colorscale':'dflt',
+			'colorscale':'spectral',
 			'linewidth':1.3,
 			'bargap' : .01,
 			'layout' : {
