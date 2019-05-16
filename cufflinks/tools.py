@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.offline as py_offline
 import plotly.plotly as py
 from plotly.graph_objs import Figure, Scatter, Line
+from plotly.tools import make_subplots
 # from plotly.graph_objs.layout import XAxis, YAxis
 
 from . import auth, ta
@@ -334,6 +335,7 @@ def getLayout(kind=None,theme=None,title='',xTitle='',yTitle='',zTitle='',barmod
 		shapes=[]
 
 		def get_shapes(xline):
+
 			orientation=xline[0]
 			xline=kwargs[xline]
 			if isinstance(xline,list):
@@ -749,6 +751,12 @@ def subplots(figures,shape=None,
 		if len(figures)==1:
 			cols=1
 			rows=1
+		elif shared_xaxes:
+			cols=1
+			rows=len(figures)
+		elif shared_yaxes:
+			cols=len(figures)
+			rows=1
 		else:
 			cols=2
 			rows=len(figures)//2+len(figures)%2
@@ -884,7 +892,7 @@ def get_subplots(rows=1,cols=1,
 		theme = auth.get_config_file()['theme']
 
 	layout= base_layout if base_layout else getLayout(theme,**check_kwargs(kwargs,__LAYOUT_AXIS))
-	sp=py.plotly.tools.make_subplots(rows=rows,cols=cols,shared_xaxes=shared_xaxes,
+	sp=make_subplots(rows=rows,cols=cols,shared_xaxes=shared_xaxes,
 										   shared_yaxes=shared_yaxes,print_grid=False,
 											start_cell=start_cell,**kwargs)
 	sp, grid_ref = sp.to_dict(), sp._grid_ref
@@ -1298,9 +1306,9 @@ def get_shape(kind='line',x=None,y=None,x0=None,y0=None,x1=None,y1=None,span=0,c
 				'paper'
 				'y2' etc
 	"""
-	if not x1:
-		if not x0:
-			if not x:
+	if x1 is None:
+		if x0 is None:
+			if x is None:
 				xref='paper'
 				x0=0
 				x1=1
@@ -1308,9 +1316,11 @@ def get_shape(kind='line',x=None,y=None,x0=None,y0=None,x1=None,y1=None,span=0,c
 				x0=x1=x
 		else:
 			x1=x0
-	if not y1:
-		if not y0:
-			if not y:
+	else:
+		x
+	if y1 is None:
+		if y0 is None:
+			if y is None:
 				yref='paper'
 				y0=0
 				y1=1

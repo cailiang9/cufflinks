@@ -3,13 +3,13 @@ import plotly.plotly as py
 import time
 import copy
 # from plotly.graph_objs import *
-from plotly.graph_objs import Figure, Bar, Box, Scatter, FigureWidget, Scatter3d, Histogram, Heatmap, Surface, Pie
+from plotly.graph_objs import Figure, Layout, Bar, Box, Scatter, FigureWidget, Scatter3d, Histogram, Heatmap, Surface, Pie
 import plotly.figure_factory as ff
 from collections import defaultdict
 from IPython.display import display,Image
 from .exceptions import CufflinksError
 from .colors import normalize,get_scales,colorgen,to_rgba,get_colorscale
-from .utils import check_kwargs, deep_update, kwargs_from_keyword
+from .utils import check_kwargs, deep_update, kwargs_from_keyword, is_list
 from . import tools 
 from . import offline
 from . import auth
@@ -198,7 +198,7 @@ def _to_iplot(self,colors=None,colorscale=None,kind='scatter',mode='lines',inter
 	return lines_plotly
 
 def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,title='',xTitle='',yTitle='',zTitle='',theme=None,colors=None,colorscale=None,fill=False,width=None,
-			dash='solid',mode='lines',interpolation='linear',symbol='circle',size=12,barmode='',sortbars=False,bargap=None,bargroupgap=None,bins=None,histnorm='',
+			dash='solid',mode='',interpolation='linear',symbol='circle',size=12,barmode='',sortbars=False,bargap=None,bargroupgap=None,bins=None,histnorm='',
 			histfunc='count',orientation='v',boxpoints=False,annotations=None,keys=False,bestfit=False,
 			bestfit_colors=None,mean=False,mean_colors=None,categories='',x='',y='',z='',text='',gridcolor=None,
 			zerolinecolor=None,margin=[50,50,50,50],labels=None,values=None,secondary_y='',secondary_y_title='',subplots=False,shape=None,error_x=None,
@@ -757,7 +757,9 @@ def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,ti
 								bargap=bargap,bargroupgap=bargroupgap,annotations=annotations,gridcolor=gridcolor,
 							   dimensions=dimensions,
 								zerolinecolor=zerolinecolor,margin=margin,is3d='3d' in kind,**l_kwargs)
-	
+	elif isinstance(layout, Layout):
+		layout = layout.to_plotly_json()
+
 	if not data:
 		if categories and kind not in ('violin'):
 			data=[]
@@ -770,7 +772,7 @@ def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,ti
 			else:
 				_keys=pd.unique(self[categories])
 				colors=get_colors(colors,colorscale,_keys)	
-				mode='markers' if 'markers' not in mode else mode 
+				mode='markers' if not mode else mode
 				for _ in _keys:
 					__=self[self[categories]==_].copy()
 					if text:
@@ -799,6 +801,14 @@ def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,ti
 								marker=dict(color=colors[_],symbol=symbol,size=_size,opacity=opacity,
 												line=dict(width=width)),textfont=tools.getLayout(theme=theme)['xaxis']['titlefont'])
 					else:
+						#see error 168
+						if type(_x)==pd.np.ndarray:
+							if '[ns]' in _x.dtype.str:
+								_x=_x.astype(str)
+						if type(_y)==pd.np.ndarray:
+							if '[ns]' in _y.dtype.str:
+								_y=_y.astype(str)
+						
 						_data=Scatter(x=_x,y=_y,mode=mode,name=_,
 								marker=dict(color=colors[_],symbol=symbol,size=_size,opacity=opacity,
 												line=dict(width=width)),textfont=tools.getLayout(theme=theme)['xaxis']['titlefont'])
@@ -821,6 +831,7 @@ def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,ti
 					df=df[y]
 				if kind=='area':
 					df=df.transpose().fillna(0).cumsum().transpose()
+				mode='lines' if not mode else mode
 				if text:
 					if not isinstance(text,list):
 						text=self[text].values
@@ -946,8 +957,14 @@ def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,ti
 				scale=get_scales('rdbu') if not colorscale else get_scales(colorscale)
 				colorscale=[[float(_)/(len(scale)-1),scale[_]] for _ in range(len(scale))]
 				center_scale = kwargs.get('center_scale',None)
-				zmin=z.min()
-				zmax=z.max()
+				
+				if is_list(z):				
+					zmin=min(z)
+					zmax=max(z)
+				else:
+					zmin=z.min()
+					zmax=z.max()
+					
 				if center_scale is not None:
 					if center_scale<=zmin+(zmax-zmin)/2:
 						zmin=center_scale*2-zmax
@@ -976,7 +993,7 @@ def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,ti
 				else:
 					size=[size for _ in range(len(keys))]	
 
-				_data=Scatter3d(x=df[x].values.tolist(),y=df[y].values.tolist(),z=df[z].values.tolist(),mode=mode,name=keys,
+				_data=Scatter3d(x=df[x].values.tolist(),y=df[y].values.tolist(),z=df[z].values.tolist(),mode=mode,text=keys,
 									marker=dict(color=colors,symbol=symbol,size=size,opacity=.8))
 				if text:
 					_data.update(text=keys)
@@ -1396,6 +1413,7 @@ def iplot(figure,validate=True,sharing=None,filename='',
 	## Offline Links
 	show_link = auth.get_config_file()['offline_show_link']
 	link_text = auth.get_config_file()['offline_link_text']
+	config = auth.get_config_file()['offline_config']
 
 	## Remove validation if shapes are present
 	if 'layout' in figure:
@@ -1411,7 +1429,7 @@ def iplot(figure,validate=True,sharing=None,filename='',
 	if asImage:
 		if offline.is_offline() and not online:
 			return offline.py_offline.iplot(figure,validate=validate, filename=filename, show_link=show_link,link_text=link_text,
-				image='png',image_width=dimensions[0],image_height=dimensions[1])
+				image='png', image_width=dimensions[0], image_height=dimensions[1], config=config)
 		else:
 			try:
 				py.image.save_as(figure,filename='img/'+filename,format='png',
@@ -1432,14 +1450,14 @@ def iplot(figure,validate=True,sharing=None,filename='',
 		filename+='.html'
 		if offline.is_offline() and not online:
 			return offline.py_offline.plot(figure, filename=filename, validate=validate,
-								show_link=show_link,link_text=link_text,auto_open=auto_open)
+								show_link=show_link, link_text=link_text, auto_open=auto_open, config=config)
 		else:
 			return py.plot(figure, sharing=sharing, filename=filename, validate=validate,
 							auto_open=auto_open)
 
 	## iplot
 	if offline.is_offline() and not online:	
-		return offline.py_offline.iplot(figure,validate=validate, filename=filename, show_link=show_link,link_text=link_text)
+		return offline.py_offline.iplot(figure, validate=validate, filename=filename, show_link=show_link, link_text=link_text, config=config)
 	else:		
 		return py.iplot(figure,validate=validate,sharing=sharing,
 						filename=filename)

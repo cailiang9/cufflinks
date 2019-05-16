@@ -27,12 +27,14 @@ _FILE_CONTENT = {
 				 		"theme" : "pearl",
 				 		"colorscale" : "dflt",
 				 		"offline" : True,
+				 		"offline_connected" : True,
 				 		"offline_url":'',
 				 		"offline_show_link" : True,
 				 		"offline_link_text" : 'Export to plot.ly',
 				 		"datagen_mode" : 'stocks',
 				 		"dimensions" : (None, 300),
-						"margin" : None
+						"margin" : None,
+						"offline_config" : None
 						}
 				 }
 
@@ -81,8 +83,9 @@ def ensure_local_files():
 					  "your 'home' ('~') directory")
 
 
-def set_config_file(sharing=None,theme=None,colorscale=None,offline=None,
+def set_config_file(sharing=None,theme=None,colorscale=None,offline=None,offline_connected=None,
 					offline_url=None,offline_show_link=None,offline_link_text=None,
+					offline_config=None,
 					datagen_mode=None,**kwargs):
 	"""
 	Set the keyword-value pairs in `~/.config`.
@@ -101,12 +104,20 @@ def set_config_file(sharing=None,theme=None,colorscale=None,offline=None,
 	offline : bool
 			If true then the charts are rendered
 			locally. 
+	offline_connected : bool
+			If True, the plotly.js library will be loaded
+			from an online CDN. If False, the plotly.js library will be loaded locally
+			from the plotly python package
 	offline_show_link : bool
 			If true then the chart will show a link to 
 			plot.ly at the bottom right of the chart 
 	offline_link_text : string
 			Text to display as link at the bottom 
 			right of the chart 
+	offline_config : dict
+			Additional configuration options
+			For the complete list of config options check out: 
+			https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js
 	datagen_mode : string
 			Mode in which the data is generated
 			by the datagen module
@@ -122,7 +133,7 @@ def set_config_file(sharing=None,theme=None,colorscale=None,offline=None,
 	if not _file_permissions:
 		raise Exception("You don't have proper file permissions "
 									 "to run this function.")
-	valid_kwargs=['world_readable','dimensions','margin']
+	valid_kwargs=['world_readable','dimensions','margin','offline_config']
 	for key in list(kwargs.keys()):
 		if key not in valid_kwargs:
 			raise Exception("Invalid keyword : '{0}'".format(key))
@@ -140,6 +151,8 @@ def set_config_file(sharing=None,theme=None,colorscale=None,offline=None,
 		config['theme']=theme
 	if colorscale:
 		config['colorscale']=colorscale
+	if offline_connected:
+		config['offline_connected']=offline_connected
 	if offline is not None:
 		config['offline']=offline
 		if offline:
@@ -152,6 +165,8 @@ def set_config_file(sharing=None,theme=None,colorscale=None,offline=None,
 		config['offline_show_link']=offline_show_link
 	if offline_link_text:
 		config['offline_link_text']=offline_link_text
+	if offline_config:
+		config['offline_config']=offline_config
 	for _ in valid_kwargs:
 		if _ in kwargs:
 			config[_]=kwargs[_]
