@@ -1,5 +1,4 @@
 import pandas as pd
-import plotly.plotly as py
 import time
 import copy
 # from plotly.graph_objs import *
@@ -165,6 +164,9 @@ def _to_iplot(self,colors=None,colorscale=None,kind='scatter',mode='lines',inter
 			trace.update(name=str(trace['name']))
 
 	if bestfit:
+		if isinstance(df.index,pd.MultiIndex):
+			raise TypeError('x cannot be empty for MultiIndex dataframes')
+
 		if type(bestfit)==list:
 			keys=bestfit
 		d={}
@@ -823,10 +825,9 @@ def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,ti
 				if x:
 					df=df.set_index(x)
 				if y and secondary_y:
-					if isinstance(secondary_y, str):
-						df=df[[y, secondary_y]]
-					else:
-						df=df[[y] + secondary_y]
+					_y = [y] if not isinstance(y, list) else y
+					_secondary_y = [secondary_y] if not isinstance(secondary_y, list) else secondary_y
+					df=df[_y + _secondary_y]
 				elif y:
 					df=df[y]
 				if kind=='area':
@@ -1402,10 +1403,9 @@ def iplot(figure,validate=True,sharing=None,filename='',
 		# if not figure.get('layout', None):
 		# 	figure['layout'] = {}
 		try:
-			filename=figure['layout']['title']
+			filename=figure.layout['title']['text']
 		except:
 			filename='Plotly Playground {0}'.format(time.strftime("%Y-%m-%d %H:%M:%S"))
-
 	## Dimensions
 	if not dimensions:
 		dimensions=(800,500) if not auth.get_config_file()['dimensions'] else auth.get_config_file()['dimensions']
@@ -1426,6 +1426,14 @@ def iplot(figure,validate=True,sharing=None,filename='',
 		auto_open=False
 
 	## Exports
+	if not offline.is_offline() or online:
+		try:
+			import chart_studio.plotly as py
+		except:
+			raise Exception("chart_studio is required outside of offline mode: " \
+					"please run " \
+					"pip install chart_studio" )
+
 	if asImage:
 		if offline.is_offline() and not online:
 			return offline.py_offline.iplot(figure,validate=validate, filename=filename, show_link=show_link,link_text=link_text,

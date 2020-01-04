@@ -3,9 +3,9 @@ import copy
 import numpy as np
 import pandas as pd
 import plotly.offline as py_offline
-import plotly.plotly as py
+import plotly.figure_factory as ff
 from plotly.graph_objs import Figure, Scatter, Line
-from plotly.tools import make_subplots
+from plotly.subplots import make_subplots
 # from plotly.graph_objs.layout import XAxis, YAxis
 
 from . import auth, ta
@@ -61,6 +61,7 @@ def getTheme(theme=None):
 	if not theme:
 		theme = auth.get_config_file()['theme']
 
+	theme = theme.lower()
 	if theme in THEMES:
 		return updateColors(copy.deepcopy(THEMES[theme]))
 	else:
@@ -500,7 +501,7 @@ def get_annotations(df,annotations,kind='lines',theme=None,**kwargs):
 						)
 				)
 
-			del annotation['title']	
+			del annotation['title']
 			local_list.append(ann)
 
 		elif 'x' in annotation:
@@ -516,6 +517,8 @@ def get_annotations(df,annotations,kind='lines',theme=None,**kwargs):
 								ax=annotation.get('ax',0),
 								ay=annotation.get('ay',-100),
 								textangle=annotation.get('textangle',-90),
+								hovertext=annotation.get('hovertext',''),
+								opacity=annotation.get('opacity',1),
 								font = dict(
 									color = annotation.get('fontcolor',annotation.get('color',kwargs.get('fontcolor'))),
 									size = annotation.get('fontsize',annotation.get('size',kwargs.get('fontsize')))
@@ -544,6 +547,8 @@ def get_annotations(df,annotations,kind='lines',theme=None,**kwargs):
 								ax=kwargs.get('ax',0),
 								ay=kwargs.get('ay',-100),
 								textangle=kwargs.get('textangle',-90),
+								hovertext=kwargs.get('hovertext', ''),
+								opacity=kwargs.get('opacity',1),
 								font = dict(
 									color = kwargs['fontcolor'],
 									size=kwargs['fontsize']
@@ -645,7 +650,7 @@ def subplots(figures,shape=None,
 				  **kwargs):
 	"""
 	Generates a subplot view for a set of figures
-	This is a wrapper for plotly.tools.make_subplots
+	This is a wrapper for plotly.subplots.make_subplots
 
 	Parameters:
 	-----------
@@ -772,7 +777,7 @@ def subplots(figures,shape=None,
 				break
 		for _ in figures[i]['data']:
 			for axe in lr:
-				_.update({'{0}axis'.format(axe[0]):axe})
+				_.update(axe.trace_kwargs)
 			sp['data'].append(_)
 	# Remove extra plots
 	for k in list(sp['layout'].keys()):
@@ -946,7 +951,7 @@ def get_ohlc(df,up_color=None,down_color=None,theme=None,layout=None,**kwargs):
 	c_dir=ta._ohlc_dict(df)
 	args=[df[c_dir[_]] for _ in ohlc]
 	args.append(df.index)
-	fig=py.plotly.tools.FigureFactory.create_ohlc(*args,**kwargs)
+	fig=ff.create_ohlc(*args,**kwargs)
 	ohlc_bars={}
 	ohlc_bars['data']=fig['data']
 	ohlc_bars['layout']=fig['layout']
@@ -967,7 +972,7 @@ def get_candle(df,up_color=None,down_color=None,theme=None,layout=None,**kwargs)
 	c_dir=ta._ohlc_dict(df)
 	args=[df[c_dir[_]] for _ in ohlc]
 	args.append(df.index)
-	fig=py.plotly.tools.FigureFactory.create_candlestick(*args,**kwargs)
+	fig=ff.create_candlestick(*args,**kwargs)
 	candle={}
 	candle['data']=fig['data']
 	candle['layout']=layout
@@ -1542,7 +1547,7 @@ def set_errors(figure,trace=None,axis='y',type='data',values=None,values_minus=N
 					color='charcoal'
 			color=to_rgba(color,opacity) if color else None
 			upper['line']['color']=color
-			lower=upper.copy()
+			lower=copy.deepcopy(upper)
 			name=trace['name']+'_' if 'name' in trace else ''
 			upper.update(name=name+'upper')
 			color=to_rgba(normalize(color),opacity)
