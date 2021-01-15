@@ -29,7 +29,7 @@ def to_rgba(color, alpha):
             color : string
                     Color representation on hex or rgb
             alpha : float
-                    Value from 0 to 1.0 that represents the 
+                    Value from 0 to 1.0 that represents the
                     alpha value.
 
     Example:
@@ -197,7 +197,7 @@ def color_range(color, N=20):
 
 def color_table(color, N=1, sort=False, sort_values=False, inline=False, as_html=False):
     """
-    Generates a colour table 
+    Generates a colour table
 
     Parameters:
     -----------
@@ -207,11 +207,11 @@ def color_table(color, N=1, sort=False, sort_values=False, inline=False, as_html
                     are displayed in a table
             N   : int
                     number of colours to generate
-                    When color is not a list then it generaes 
+                    When color is not a list then it generaes
                     a range of N colors
-            sort : bool 
+            sort : bool
                     if True then items are sorted
-            sort_values : bool 
+            sort_values : bool
                     if True then items are sorted by color values.
                     Only applies if color is a dictionary
             inline : bool
@@ -272,7 +272,7 @@ def color_table(color, N=1, sort=False, sort_values=False, inline=False, as_html
                 c)
         else:
             color, shadow, border = _color(c)
-            s += """<li style="text-align:center;""" + border + """line-height:30px;background-color:""" + c + """;"> 
+            s += """<li style="text-align:center;""" + border + """line-height:30px;background-color:""" + c + """;">
             <span style=" text-shadow:""" + shadow + """; color:""" + color + """;">""" + k + c.upper() + """</span>
             </li>"""
     s += '</ul>' if not inline else ''
@@ -321,8 +321,7 @@ def colorgen(colors=None, n=None, scale=None, theme=None):
 # Color Names
 # ---------------------------------
 
-
-cnames = {'aliceblue': '#F0F8FF',
+cnames = {'aliceblue':		 '#F0F8FF',
           'antiquewhite':	 '#FAEBD7',
           'aqua':			 '#00FFFF',
           'aquamarine':		 '#7FFFD4',
@@ -347,7 +346,7 @@ cnames = {'aliceblue': '#F0F8FF',
           'coral':			 '#FF7F50',
           'cornflowerblue':	 '#6495ED',
           'cornsilk':		 '#FFF8DC',
-          'crimson':			 '#DC143C',
+          'crimson':		 '#DC143C',
           'cyan':			 '#00FFFF',
           'darkblue':		 '#00008B',
           'darkcyan':		 '#008B8B',
@@ -356,11 +355,11 @@ cnames = {'aliceblue': '#F0F8FF',
           'darkgreen':		 '#006400',
           'darkgrey':		 '#A9A9A9',
           'darkkhaki':		 '#BDB76B',
-          'darkmagenta':		 '#8B008B',
+          'darkmagenta':	 '#8B008B',
           'darkolivegreen':	 '#556B2F',
           'darkorange':		 '#FF8C00',
           'darkorchid':		 '#9932CC',
-          'darkred':			 '#8B0000',
+          'darkred':		 '#8B0000',
           'darksalmon':		 '#E9967A',
           'darkseagreen':	 '#8FBC8F',
           'darkslateblue':	 '#483D8B',
@@ -369,14 +368,14 @@ cnames = {'aliceblue': '#F0F8FF',
           'darkturquoise':	 '#00CED1',
           'darkviolet':		 '#9400D3',
           'deeppink':		 '#FF1493',
-          'deepskyblue':		 '#00BFFF',
-          'dimgray':			 '#696969',
-          'dimgrey':			 '#696969',
+          'deepskyblue':	 '#00BFFF',
+          'dimgray':		 '#696969',
+          'dimgrey':		 '#696969',
           'dodgerblue':		 '#1E90FF',
           'firebrick':		 '#B22222',
-          'floralwhite':		 '#FFFAF0',
-          'forestgreen':		 '#228B22',
-          'fuchsia':			 '#FF00FF',
+          'floralwhite':	 '#FFFAF0',
+          'forestgreen':	 '#228B22',
+          'fuchsia':		 '#FF00FF',
           'gainsboro':		 '#DCDCDC',
           'ghostwhite':		 '#F8F8FF',
           'gold':			 '#FFD700',
@@ -384,7 +383,7 @@ cnames = {'aliceblue': '#F0F8FF',
           'grassgreen':		 '#32ab60',
           'gray':			 '#808080',
           'green':			 '#008000',
-          'greenyellow':		 '#ADFF2F',
+          'greenyellow':	 '#ADFF2F',
           'grey':			 '#808080',
           'grey01':			 '#0A0A0A',
           'grey02':			 '#151516',
@@ -401,7 +400,7 @@ cnames = {'aliceblue': '#F0F8FF',
           'grey13':			 '#E2E2E2',
           'grey14':			 '#E5E5E5',
           'honeydew':		 '#F0FFF0',
-          'hotpink':			 '#FF69B4',
+          'hotpink':		 '#FF69B4',
           'indianred':		 '#CD5C5C',
           'indigo':			 '#4B0082',
           'ivory':			 '#FFFFF0',
@@ -412,50 +411,50 @@ cnames = {'aliceblue': '#F0F8FF',
           'lawngreen':		 '#7CFC00',
           'lemonchiffon':	 '#FFFACD',
           'lightpink2':		 '#fccde5',
-          'lightpurple':		 '#bc80bd',
+          'lightpurple':	 '#bc80bd',
           'lightblue':		 '#ADD8E6',
           'lightcoral':		 '#F08080',
           'lightcyan':		 '#E0FFFF',
-          'lightgoldenrodyellow':	 '#FAFAD2',
+          'lightgoldenrodyellow':'#FAFAD2',
           'lightgray':		 '#D3D3D3',
           'lightgreen':		 '#90EE90',
           'lightgrey':		 '#D3D3D3',
           'lightivory':		 '#F6F6F6',
           'lightpink':		 '#FFB6C1',
-          'lightsalmon':		 '#FFA07A',
+          'lightsalmon':	 '#FFA07A',
           'lightseagreen':	 '#20B2AA',
           'lightskyblue':	 '#87CEFA',
           'lightslategray':	 '#778899',
           'lightslategrey':	 '#778899',
           'lightsteelblue':	 '#B0C4DE',
           'lightteal':		 '#8dd3c7',
-          'lightyellow':		 '#FFFFE0',
+          'lightyellow':	 '#FFFFE0',
           'lightblue2':		 '#80b1d3',
-          'lightviolet':		 '#8476CA',
+          'lightviolet':	 '#8476CA',
           'lime':			 '#00FF00',
           'lime2':			 '#8EBA42',
           'limegreen':		 '#32CD32',
           'linen':			 '#FAF0E6',
-          'magenta':			 '#FF00FF',
+          'magenta':		 '#FF00FF',
           'maroon':			 '#800000',
-          'mediumaquamarine': '#66CDAA',
+          'mediumaquamarine':'#66CDAA',
           'mediumblue':		 '#0000CD',
           'mediumgray': 	 '#656565',
           'mediumorchid':	 '#BA55D3',
           'mediumpurple':	 '#9370DB',
           'mediumseagreen':	 '#3CB371',
-          'mediumslateblue':	 '#7B68EE',
-          'mediumspringgreen': '#00FA9A',
-          'mediumturquoise':	 '#48D1CC',
-          'mediumvioletred':	 '#C71585',
+          'mediumslateblue': '#7B68EE',
+          'mediumspringgreen':'#00FA9A',
+          'mediumturquoise': '#48D1CC',
+          'mediumvioletred': '#C71585',
           'midnightblue':	 '#191970',
           'mintcream':		 '#F5FFFA',
           'mistyrose':		 '#FFE4E1',
           'moccasin':		 '#FFE4B5',
-          'mustard':			 '#FBC15E',
-          'navajowhite':		 '#FFDEAD',
+          'mustard':		 '#FBC15E',
+          'navajowhite':	 '#FFDEAD',
           'navy':			 '#000080',
-          'oldlace':			 '#FDF5E6',
+          'oldlace':		 '#FDF5E6',
           'olive':			 '#808000',
           'olivedrab':		 '#6B8E23',
           'orange':			 '#ff9933',
@@ -469,11 +468,11 @@ cnames = {'aliceblue': '#F0F8FF',
           'papayawhip':		 '#FFEFD5',
           'peachpuff':		 '#FFDAB9',
           'pearl':			 '#D9D9D9',
-          'pearl02':			 '#F5F6F9',
-          'pearl03':			 '#E1E5ED',
-          'pearl04':			 '#9499A3',
-          'pearl05':			 '#6F7B8B',
-          'pearl06':			 '#4D5663',
+          'pearl02':		 '#F5F6F9',
+          'pearl03':		 '#E1E5ED',
+          'pearl04':		 '#9499A3',
+          'pearl05':		 '#6F7B8B',
+          'pearl06':		 '#4D5663',
           'peru':			 '#CD853F',
           'pink':			 '#ff0088',
           'pinksalmon':		 '#FFB5B8',
@@ -487,34 +486,34 @@ cnames = {'aliceblue': '#F0F8FF',
           'polardust':		 '#F2F3F7',
           'polargrey':		 '#505050',
           'polargreen':		 '#309054',
-          'polarorange':		 '#EE7600',
-          'polarpurple':		 '#6262DE',
+          'polarorange':	 '#EE7600',
+          'polarpurple':	 '#6262DE',
           'polarred':		 '#D94255',
           'powderblue':		 '#B0E0E6',
           'purple':			 '#800080',
-          'red':				 '#db4052',
+          'red':			 '#db4052',
           'rose':			 '#FFC0CB',
           'rosybrown':		 '#BC8F8F',
           'royalblue':		 '#4169E1',
-          'saddlebrown':		 '#8B4513',
+          'saddlebrown':	 '#8B4513',
           'salmon':			 '#fb8072',
           'sandybrown':		 '#FAA460',
-          'seaborn':			 '#EAE7E4',
+          'seaborn':		 '#EAE7E4',
           'seagreen':		 '#2E8B57',
           'seashell':		 '#FFF5EE',
           'sienna':			 '#A0522D',
           'silver':			 '#C0C0C0',
-          'skyblue':			 '#87CEEB',
+          'skyblue':		 '#87CEEB',
           'slateblue':		 '#6A5ACD',
           'slategray':		 '#708090',
           'slategrey':		 '#708090',
           'smurf':			 '#3E6FB0',
           'snow':			 '#FFFAFA',
-          'springgreen':		 '#00FF7F',
+          'springgreen':	 '#00FF7F',
           'steelblue':		 '#4682B4',
-          'tan':				 '#D2B48C',
+          'tan':			 '#D2B48C',
           'teal':			 '#008080',
-          'thistle':			 '#D8BFD8',
+          'thistle':		 '#D8BFD8',
           'tomato':			 '#FF6347',
           'turquoise':		 '#40E0D0',
           'violet':			 '#EE82EE',
@@ -522,7 +521,7 @@ cnames = {'aliceblue': '#F0F8FF',
           'white':			 '#FFFFFF',
           'whitesmoke':		 '#F5F5F5',
           'yellow':			 '#ffff33',
-          'yellowgreen':		 '#9ACD32',
+          'yellowgreen':	    '#9ACD32',
           "henanigans_bg":      "#242424",
           "henanigans_blue1":   "#5F95DE",
           "henanigans_blue2":   "#93B6E6",
@@ -559,7 +558,10 @@ _custom_scales = {
         'ggplot': ['brick', 'smurf', 'lightviolet', 'mediumgray', 'mustard', 'lime2', 'pinksalmon'],
         'polar': ['polarblue', 'polarorange', 'polargreen', 'polarpurple', 'polarred', 'polarcyan', 'polarbluelight'],
         'plotly' : ['rgb(31, 119, 180)', 'rgb(255, 127, 14)', 'rgb(44, 160, 44)', 'rgb(214, 39, 40)',
-                    'rgb(148, 103, 189)', 'rgb(140, 86, 75)', 'rgb(227, 119, 194)', 'rgb(127, 127, 127)', 'rgb(188, 189, 34)', 'rgb(23, 190, 207)']
+                    'rgb(148, 103, 189)', 'rgb(140, 86, 75)', 'rgb(227, 119, 194)', 'rgb(127, 127, 127)', 'rgb(188, 189, 34)', 'rgb(23, 190, 207)'],
+        'henanigans': ['henanigans_cyan2', 'henanigans_red2', 'henanigans_green2', 'henanigans_blue2', 'henanigans_orange2',
+                       'henanigans_purple2', 'henanigans_yellow2', 'henanigans_light2', 'henanigans_cyan1', 'henanigans_red1',
+                       'henanigans_green1', 'henanigans_blue1']
     },
     'div': {
 
@@ -601,7 +603,7 @@ def scales(scale=None):
                     Color scale name
                     If no scale name is provided then all scales are returned
                             (max number for each scale)
-                    If scale='all' then all scale combinations available 
+                    If scale='all' then all scale combinations available
                             will be returned
 
     Example:
@@ -666,20 +668,20 @@ def reset_scales():
 
 def get_scales(scale=None, n=None):
     """
-    Returns a color scale 
+    Returns a color scale
 
     Parameters:
     -----------
             scale : str
                     Color scale name
-                    If the color name is preceded by a minus (-) 
+                    If the color name is preceded by a minus (-)
                     then the scale is inversed
             n : int
-                    Number of colors 
-                    If n < number of colors available for a given scale then 
-                            the minimum number will be returned 
+                    Number of colors
+                    If n < number of colors available for a given scale then
+                            the minimum number will be returned
                     If n > number of colors available for a given scale then
-                            the maximum number will be returned 
+                            the maximum number will be returned
 
     Example:
             get_scales('accent',8)
@@ -722,7 +724,7 @@ def get_colorscale(scale):
     -----------
             scale : str or list
                     Color scale name
-                    If the color name is preceded by a minus (-) 
+                    If the color name is preceded by a minus (-)
                     then the scale is inversed.
                     Also accepts a list of colors (rgb,rgba,hex)
 

@@ -1,6 +1,7 @@
 import pandas as pd
 import time
 import copy
+import numpy as np
 # from plotly.graph_objs import *
 from plotly.graph_objs import Figure, Layout, Bar, Box, Scatter, FigureWidget, Scatter3d, Histogram, Heatmap, Surface, Pie
 import plotly.figure_factory as ff
@@ -94,7 +95,7 @@ def _to_iplot(self,colors=None,colorscale=None,kind='scatter',mode='lines',inter
 			* Only valid when kind='bar'
 		keys : list of columns
 			List of columns to chart.
-			Also can be usded for custom sorting.
+			Also can be used for custom sorting.
 		bestfit : boolean or list
 			If True then a best fit line will be generated for 
 			all columns. 
@@ -804,10 +805,10 @@ def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,ti
 												line=dict(width=width)),textfont=tools.getLayout(theme=theme)['xaxis']['titlefont'])
 					else:
 						#see error 168
-						if type(_x)==pd.np.ndarray:
+						if type(_x)==np.ndarray:
 							if '[ns]' in _x.dtype.str:
 								_x=_x.astype(str)
-						if type(_y)==pd.np.ndarray:
+						if type(_y)==np.ndarray:
 							if '[ns]' in _y.dtype.str:
 								_y=_y.astype(str)
 						
@@ -846,8 +847,8 @@ def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,ti
 				if kind in ('spread','ratio'):
 						if kind=='spread':
 							trace=self.apply(lambda x:x[0]-x[1],axis=1)
-							positive=trace.apply(lambda x:x if x>=0 else pd.np.nan)
-							negative=trace.apply(lambda x:x if x<0 else pd.np.nan)
+							positive=trace.apply(lambda x:x if x>=0 else np.nan)
+							negative=trace.apply(lambda x:x if x<0 else np.nan)
 							trace=pd.DataFrame({'positive':positive,'negative':negative})
 							trace=trace.to_iplot(colors={'positive':'green','negative':'red'},width=0.5)
 						else:
@@ -956,6 +957,7 @@ def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,ti
 				y=self[y].values.tolist() if y else self.columns.values.tolist()
 				z=self[z].values.tolist() if z else self.values.transpose()
 				scale=get_scales('rdbu') if not colorscale else get_scales(colorscale)
+				scale=[normalize(_) for _ in scale]
 				colorscale=[[float(_)/(len(scale)-1),scale[_]] for _ in range(len(scale))]
 				center_scale = kwargs.get('center_scale',None)
 				
@@ -1107,9 +1109,9 @@ def _iplot(self,kind='scatter',data=None,layout=None,filename='',sharing=None,ti
 				if histnorm:
 					kw['histnorm']=histnorm
 				fig=ff.create_distplot(hist_data=hist_data,group_labels=group_labels,
-										 colors=colors,**kw)
-				data=fig.data
-				layout=tools.merge_dict(layout,fig.layout)
+										 colors=colors,**kw).to_dict()
+				data=fig['data']
+				layout=tools.merge_dict(layout,fig['layout'])
 			elif kind in ('violin'):
 				df=pd.DataFrame(self) if type(self)==pd.core.series.Series else self.copy()
 				kw=check_kwargs(kwargs,FF_VIOLIN)
@@ -1723,6 +1725,17 @@ def _fig_iplot(self,validate=True,sharing=None,filename='',
 			 dimensions=dimensions,display_image=display_image,**kwargs)
 
 
+def _figure_widget(df, **kwargs):
+    import plotly.graph_objects as go
+    figw = go.FigureWidget(df.figure(**kwargs))
+    figw.__df__ = df
+    return figw
+
+def update_figurew(figw, df = None):
+    if df is None: df = figw.__df__
+    return figw.update(data=[{'x':col.index, 'y':col, 'name':colname} for colname, col in df.iteritems()])
+
+pd.DataFrame.figure_widget = _figure_widget
 pd.DataFrame.to_iplot=_to_iplot
 pd.DataFrame.scatter_matrix=_scatter_matrix
 pd.DataFrame.figure=_figure
@@ -1736,5 +1749,4 @@ pd.Series.figure=_figure
 pd.Series.to_iplot=_to_iplot
 pd.Series.iplot=_iplot
 Figure.iplot=_fig_iplot
-
 

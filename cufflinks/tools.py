@@ -8,9 +8,9 @@ from plotly.graph_objs import Figure, Scatter, Line
 from plotly.subplots import make_subplots
 # from plotly.graph_objs.layout import XAxis, YAxis
 
+from . import themes
 from . import auth, ta
 from .colors import normalize, to_rgba
-from .themes import THEMES
 from .utils import (check_kwargs, deep_update, dict_replace_keyword,
                     kwargs_from_keyword, merge_dict, is_list,make_list)
 
@@ -62,8 +62,8 @@ def getTheme(theme=None):
 		theme = auth.get_config_file()['theme']
 
 	theme = theme.lower()
-	if theme in THEMES:
-		return updateColors(copy.deepcopy(THEMES[theme]))
+	if theme in themes.THEMES:
+		return updateColors(copy.deepcopy(themes.THEMES[theme]))
 	else:
 		raise Exception("Invalid Theme: {0}".format(theme))
 
@@ -71,7 +71,7 @@ def getThemes():
 	"""
 	Returns the list of available themes
 	"""
-	return list(THEMES.keys())
+	return list(themes.THEMES.keys())
 
 def updateColors(layout):
 	for k,v in list(layout.items()):
@@ -227,8 +227,12 @@ def getLayout(kind=None,theme=None,title='',xTitle='',yTitle='',zTitle='',barmod
 
 	theme_data = getTheme(theme)
 	layout=theme_data['layout']
-	layout['xaxis'].update({'title':xTitle})
-	layout['yaxis'].update({'title':yTitle})
+	try:
+		layout['xaxis']['title'].update({'text':xTitle})
+		layout['yaxis']['title'].update({'text':yTitle})
+	except:
+		layout['xaxis'].update({'title':xTitle})
+		layout['yaxis'].update({'title':yTitle})
 
 	fontfamily=kwargs.pop('fontfamily',None)
 	if fontfamily:
@@ -242,7 +246,10 @@ def getLayout(kind=None,theme=None,title='',xTitle='',yTitle='',zTitle='',barmod
 	if bargap:
 		layout.update(bargap=bargap)
 	if title:
-		layout.update({'title':title})
+		try:
+			layout['title'].update({'text':title})
+		except:
+			layout.update({'title':title})
 	if annotations:
 		layout.update({'annotations':annotations})
 
@@ -530,10 +537,10 @@ def get_annotations(df,annotations,kind='lines',theme=None,**kwargs):
 			for k,v in list(annotation.items()):
 				if kind in ('candlestick','ohlc','candle'):
 					d=ta._ohlc_dict(df)
-					maxv=df[d['high']].ix[k]
+					maxv=df[d['high']].loc[k]
 					yref='y2'
 				else:
-					maxv=df.ix[k].sum() if k in df.index else 0
+					maxv=df.loc[k].sum() if k in df.index else 0
 					yref='y1'
 				ann=dict(
 								x=k,
@@ -1371,8 +1378,8 @@ def get_trendline(df,date0,date1,column='close',**kwargs):
 	df=pd.DataFrame(df[column])
 	d={'x0':date0,
 	   'x1':date1,
-	   'y0':df.ix[date0].values[0],
-	   'y1':df.ix[date1].values[0]}
+	   'y0':df.loc[date0].values[0],
+	   'y1':df.loc[date1].values[0]}
 	d.update(**kwargs)
 	return d
 
